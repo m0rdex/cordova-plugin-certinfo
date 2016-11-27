@@ -1,9 +1,9 @@
 {
-  "name": "cordova-plugin-sslcertificatechecker",
-  "version": "5.0.0",
-  "description": "This plugin allows allows you to check the SSL Certificate of the server you're connecting to. This can be useful for prevention of Man In The Middle attacks.",
+  "name": "cordova-plugin-certinfo",
+  "version": "0.1.0",
+  "description": "This plugin allows allows you to fetch the SSL Certificate of the server you're connecting to. This can be useful for prevention of Man In The Middle attacks.",
   "cordova": {
-    "id": "cordova-plugin-sslcertificatechecker",
+    "id": "cordova-plugin-certinfo",
     "platforms": [
       "ios",
       "android"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git"
+    "url": "git+https://github.com/yyfearth/cordova-plugin-certinfo.git"
   },
   "keywords": [
     "Certificate",
@@ -30,9 +30,5 @@
     }
   ],
   "author": "Eddy Verbruggen <eddyverbruggen@gmail.com> (https://github.com/EddyVerbruggen)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/issues"
-  },
-  "homepage": "https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#readme"
+  "license": "MIT"
 }

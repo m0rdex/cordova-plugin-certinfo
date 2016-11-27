@@ -1,4 +1,4 @@
-package nl.xservices.plugins;
+package org.apache.cordova.certinfo;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -14,14 +14,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 
-public class SSLCertificateChecker extends CordovaPlugin {
+public class CertInfo extends CordovaPlugin {
 
-  private static final String ACTION_CHECK_EVENT = "check";
+  private static final String ACTION_FETCH_EVENT = "fetch";
   private static char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
   @Override
   public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    if (ACTION_CHECK_EVENT.equals(action)) {
+    if (ACTION_FETCH_EVENT.equals(action)) {
       cordova.getThreadPool().execute(new Runnable() {
         public void run() {
           try {
@@ -42,7 +42,7 @@ public class SSLCertificateChecker extends CordovaPlugin {
       });
       return true;
     } else {
-      callbackContext.error("sslCertificateChecker." + action + " is not a supported function. Did you mean '" + ACTION_CHECK_EVENT + "'?");
+      callbackContext.error("CertInfo." + action + " is not a supported function. Did you mean '" + ACTION_FETCH_EVENT + "'?");
       return false;
     }
   }
