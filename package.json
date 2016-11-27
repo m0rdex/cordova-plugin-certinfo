@@ -6,8 +6,7 @@
     "id": "cordova-plugin-sslcertificatechecker",
     "platforms": [
       "ios",
-      "android",
-      "windows"
+      "android"
     ]
   },
   "repository": {
@@ -22,8 +21,7 @@
     "MitM",
     "ecosystem:cordova",
     "cordova-ios",
-    "cordova-android",
-    "cordova-windows"
+    "cordova-android"
   ],
   "engines": [
     {

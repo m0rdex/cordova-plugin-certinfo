@@ -48,11 +48,4 @@
     <source-file src="src/android/SSLCertificateChecker.java" target-dir="src/nl/xservices/plugins"/>
   </platform>
 
-  <!-- windows -->
-  <platform name="windows">
-    <js-module src="src/windows/sslCertCheckPluginProxy.js" name="SSLCertCheckProxy">
-      <merges target="" />
-    </js-module>
-  </platform>
-
 </plugin>
