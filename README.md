@@ -1,27 +1,4 @@
-# PhoneGap SSL Certificate Checker plugin (iOS, Android)
-
-by [Eddy Verbruggen](http://www.x-services.nl)
-for PhoneGap 3.0.0 and up.
-
-
-1. [Description](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#1-description)
-2. [Installation](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#2-installation)
-	2. [Automatically (CLI / Plugman)](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#automatically-cli--plugman)
-	2. [Manually](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#manually)
-	2. [PhoneGap Build](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#phonegap-build)
-3. [Usage](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#3-usage)
-4. [Credits](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin#4-credits)
-
-<table width="100%">
-    <tr>
-        <td width="100">Need SSL Pinning?</td>
-        <td>If checking the certificate manually isn't sufficient for your needs and you want to be absolutely positive each and every HTTPS request is sent to your server, then take a look at the <a href="http://plugins.telerik.com/plugin/secure-http">Secure HTTP plugin</a>.</td>
-    </tr>
-    <tr>
-        <td>Cert Chain checking</td>
-        <td>Up until version 4.0.0 this plugin offered a way to check the chain through the `checkInCertChain` property, but this is actually not really secure so I removed it from the plugin. If you need this (and don't want to do pinning, so I would advise against it) then use an older version.</td>
-    </tr>
-</table>
+# Cordova SSL/TLS Certificate Info plugin (iOS, Android)
 
 ## 1. Description
 
@@ -32,27 +9,16 @@ because you can actively verify the SSL certificate of the server by comparing a
 You may want to check the connection when the app is started, but you can choose to invoke this plugin
 everytime you communicate with the server. In either case, you can add your logic to the success and error callbacks.
 
-* This version is for PhoneGap 3.0 and higher.
-* PhoneGap 2.9 and lower is available in the [pre-phonegap-3 tree](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/tree/pre-phonegap-3).
-* Compatible with [Cordova Plugman](https://github.com/apache/cordova-plugman).
-* [Officially supported by PhoneGap Build](https://build.phonegap.com/plugins).
-
 ## 2. Installation
 
 Latest stable version from npm:
 ```
-$ cordova plugin add cordova-plugin-sslcertificatechecker
+$ cordova plugin add cordova-plugin-certinfo
 ```
 
 Bleeding edge version from Github:
 ```
-$ cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin
-```
-
-### PhoneGap Build
-
-```xml
-<gap:plugin name="cordova-plugin-sslcertificatechecker" source="npm" />
+$ cordova plugin add https://github.com/yyfearth/cordova-plugin-certinfo
 ```
 
 ## 3. Usage
@@ -102,6 +68,9 @@ Note you may want to force clients to update the app when the new certificate is
 
 
 ## 4. Credits
+
+This plugin is forked from the original repo [SSLCertificateChecker-PhoneGap-Plugin](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin) by EddyVerbruggen.
+
 The iOS code was inspired by a closed-source, purely native certificate pinning implementation by Rob Bosman.
 
 [Jacob Weber](https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/issues/9) did some great work to support checking multiple certificates on iOS, thanks!

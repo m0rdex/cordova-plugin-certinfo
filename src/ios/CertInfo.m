@@ -1,4 +1,4 @@
-#import "SSLCertificateChecker.h"
+#import "CertInfo.h"
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPluginResult.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -145,14 +145,14 @@
 @end
 
 
-@interface SSLCertificateChecker ()
+@interface CertInfo ()
 
 @property (strong, nonatomic) NSString *_callbackId;
 @property (strong, nonatomic) NSMutableData *_connections;
 
 @end
 
-@implementation SSLCertificateChecker
+@implementation CertInfo
 
 - (void)check:(CDVInvokedUrlCommand*)command {
     NSString *serverURL = [command.arguments objectAtIndex:0];

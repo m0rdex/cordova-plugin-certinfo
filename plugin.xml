@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-      	xmlns:android="http://schemas.android.com/apk/res/android"
-        id="cordova-plugin-sslcertificatechecker"
-        version="5.0.0">
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		id="cordova-plugin-certinfo"
+		version="5.0.0">
 
-  <name>SSL Certificate Checker</name>
+	<name>Cordova SSL/TLS Certificate Info</name>
 
-  <description>
-    This plugin allows allows you to check the SSL Certificate of the server you're connecting to.
-    This can be useful for prevention of Man In The Middle attacks.
-  </description>
+	<description>
+		This plugin allows allows you to fetch the SSL/TLS Certificate of the server you're connecting to.
+		This can be useful for prevention of Man In The Middle attacks.
+	</description>
 
-  <keywords>Certificate, SSL, Pinning, Man in the Middle, MitM</keywords>
+	<keywords>Certificate, SSL, TLS, Pinning, Man in the Middle, MitM</keywords>
 
-  <license>MIT</license>
+	<license>MIT</license>
 
-  <engines>
-    <engine name="cordova" version=">=3.0.0"/>
-  </engines>
+	<engines>
+		<engine name="cordova" version=">=3.0.0"/>
+	</engines>
 
-  <js-module name="SSLCertificateChecker" src="www/SSLCertificateChecker.js">
-    <clobbers target="window.plugins.sslCertificateChecker" />
-  </js-module>
+	<js-module name="CertInfo" src="www/CertInfo.js">
+		<clobbers target="window.plugins.CertInfo"/>
+	</js-module>
 
-  <!-- ios -->
- 	<platform name="ios">
- 		<config-file target="config.xml" parent="/*">
- 			<feature name="SSLCertificateChecker">
- 				<param name="ios-package" value="SSLCertificateChecker" />
- 			</feature>
- 		</config-file>
- 		<header-file src="src/ios/SSLCertificateChecker.h" />
- 		<source-file src="src/ios/SSLCertificateChecker.m" />
-		<framework src="Security.framework" />
- 	</platform>
+	<!-- ios -->
+	<platform name="ios">
+		<config-file target="config.xml" parent="/*">
+			<feature name="CertInfo">
+				<param name="ios-package" value="CertInfo"/>
+			</feature>
+		</config-file>
+		<header-file src="src/ios/CertInfo.h"/>
+		<source-file src="src/ios/CertInfo.m"/>
+		<framework src="Security.framework"/>
+	</platform>
 
-  <!-- android -->
-  <platform name="android">
-    <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="SSLCertificateChecker">
-        <param name="android-package" value="nl.xservices.plugins.SSLCertificateChecker" />
-      </feature>
-    </config-file>
-    <config-file target="AndroidManifest.xml" parent="/manifest">
-        <uses-permission android:name="android.permission.INTERNET" />
-    </config-file>
-    <source-file src="src/android/SSLCertificateChecker.java" target-dir="src/nl/xservices/plugins"/>
-  </platform>
+	<!-- android -->
+	<platform name="android">
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="CertInfo">
+				<param name="android-package" value="org.apache.cordova.certinfo.CertInfo"/>
+			</feature>
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.INTERNET"/>
+		</config-file>
+		<source-file src="src/android/CertInfo.java" target-dir="src/org/apache/cordova/certinfo"/>
+	</platform>
 
 </plugin>

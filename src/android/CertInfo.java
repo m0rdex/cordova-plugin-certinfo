@@ -1,4 +1,4 @@
-package nl.xservices.plugins;
+package org.apache.cordova.certinfo;
 
 import android.util.Base64;
 
@@ -28,7 +28,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-public class SSLCertificateChecker extends CordovaPlugin {
+public class CertInfo extends CordovaPlugin {
 
   private static final String ACTION_CHECK_EVENT = "check";
   private static char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
@@ -141,7 +141,7 @@ public class SSLCertificateChecker extends CordovaPlugin {
       });
       return true;
     } else {
-      callbackContext.error("sslCertificateChecker." + action + " is not a supported function. Did you mean '" + ACTION_CHECK_EVENT + "'?");
+      callbackContext.error("CertInfo." + action + " is not a supported function. Did you mean '" + ACTION_CHECK_EVENT + "'?");
       return false;
     }
   }
