@@ -7,7 +7,6 @@
 
 @property (strong, nonatomic) CDVPlugin *_plugin;
 @property (strong, nonatomic) NSString *_callbackId;
-@property (nonatomic, assign) BOOL _checkInCertChain;
 @property (strong, nonatomic) NSArray *_allowedFingerprints;
 @property (nonatomic, assign) BOOL sentResponse;
 
@@ -22,7 +21,6 @@
     self.sentResponse = FALSE;
     self._plugin = plugin;
     self._callbackId = callbackId;
-    self._checkInCertChain = FALSE; // if for some reason this code is called we will still not check the chain because it's insecure
     self._allowedFingerprints = allowedFingerprints;
     return self;
 }
@@ -31,14 +29,10 @@
 - (void) connection: (NSURLConnection*)connection willSendRequestForAuthenticationChallenge: (NSURLAuthenticationChallenge*)challenge {
     SecTrustRef trustRef = [[challenge protectionSpace] serverTrust];
     SecTrustEvaluate(trustRef, NULL);
-    
-    //    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+
     [connection cancel];
     
     CFIndex count = 1;
-    if (self._checkInCertChain) {
-        count = SecTrustGetCertificateCount(trustRef);
-    }
     
     for (CFIndex i = 0; i < count; i++)
     {
