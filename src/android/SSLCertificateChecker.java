@@ -26,15 +26,18 @@ public class SSLCertificateChecker extends CordovaPlugin {
         public void run() {
           try {
             final String serverURL = args.getString(0);
-            final JSONArray allowedFingerprints = args.getJSONArray(2);
-            final String serverCertFingerprint = getFingerprint(serverURL);
-            for (int j=0; j<allowedFingerprints.length(); j++) {
-              if (allowedFingerprints.get(j).toString().equalsIgnoreCase(serverCertFingerprint)) {
-                callbackContext.success("CONNECTION_SECURE");
-                return;
-              }
-            }
-            callbackContext.error("CONNECTION_NOT_SECURE");
+            //final JSONArray allowedFingerprints = args.getJSONArray(2);
+            final Certificate cert = getCertificate(serverURL);
+            final byte[] data = cert.getEncoded();
+            final String fingerprint = getFingerprint(data);
+            callbackContext.success(new JSONObject(ImmutableMap.of("certificate", data, "fingerprint", fingerprint, "summary", cert.toString())));
+            //for (int j=0; j<allowedFingerprints.length(); j++) {
+            //  if (allowedFingerprints.get(j).toString().equalsIgnoreCase(serverCertFingerprint)) {
+            //    callbackContext.success("CONNECTION_SECURE");
+            //    return;
+            //  }
+            //}
+            //callbackContext.error("CONNECTION_NOT_SECURE");
           } catch (Exception e) {
             callbackContext.error("CONNECTION_FAILED. Details: " + e.getMessage());
           }
@@ -47,13 +50,17 @@ public class SSLCertificateChecker extends CordovaPlugin {
     }
   }
 
-  private static String getFingerprint(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
+  private static String getCertificate(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
     final HttpsURLConnection con = (HttpsURLConnection) new URL(httpsURL).openConnection();
     con.setConnectTimeout(5000);
     con.connect();
     final Certificate cert = con.getServerCertificates()[0];
+    return cert;
+  }
+
+  private static String getFingerprint(final byte[] data) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
     final MessageDigest md = MessageDigest.getInstance("SHA1");
-    md.update(cert.getEncoded());
+    md.update(data);
     return dumpHex(md.digest());
   }
 

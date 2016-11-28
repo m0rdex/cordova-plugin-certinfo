@@ -31,33 +31,56 @@
     SecTrustEvaluate(trustRef, NULL);
 
     [connection cancel];
-    
-    CFIndex count = 1;
-    
-    for (CFIndex i = 0; i < count; i++)
-    {
-        SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, i);
-        NSString* fingerprint = [self getFingerprint:certRef];
-        
-        if ([self isFingerprintTrusted: fingerprint]) {
-            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
-            [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
-            self.sentResponse = TRUE;
-            break;
-        }
+
+    SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, 0);
+    NSData* certData = (__bridge NSData*) SecCertificateCopyData(certRef);
+
+    if (certData == NULL) {
+         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
+         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+         return;
     }
-    
-    if (! self.sentResponse) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
-        [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
-    }
-    
+
+    NSString* data = [certData base64EncodedStringWithOptions:0];
+    NSString* summary = [[NSString alloc] initWithString:(__bridge NSString*) SecCertificateCopySubjectSummary(certRef)];
+    NSString* fingerprint = [self getFingerprint:certData];
+
+    NSDictionary* dict = @{
+        @"certificate" : data,
+        @"fingerprint" : fingerprint,
+            @"summary" : summary
+    };
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dict];
+    [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+    self.sentResponse = TRUE;
+
+    // CFIndex count = 1;
+    //
+    // for (CFIndex i = 0; i < count; i++)
+    // {
+    //     SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, i);
+    //     NSString* fingerprint = [self getFingerprint:certRef];
+    //
+    //     if ([self isFingerprintTrusted: fingerprint]) {
+    //         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
+    //         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+    //         self.sentResponse = TRUE;
+    //         break;
+    //     }
+    // }
+    //
+    // if (! self.sentResponse) {
+    //     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
+    //     [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+    // }
+
 }
 
 // Delegate method, called from connectionWithRequest
 - (void) connection: (NSURLConnection*)connection didFailWithError: (NSError*)error {
     connection = nil;
-    
+
     NSString *resultCode = @"CONNECTION_FAILED. Details:";
     NSString *errStr = [NSString stringWithFormat:@"%@ %@", resultCode, [error localizedDescription]];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:errStr];
@@ -67,16 +90,17 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     connection = nil;
-    
+
     if (![self sentResponse]) {
-        NSLog(@"Connection was not checked because it was cached. Considering it secure to not break your app.");
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
+        // NSLog(@"Connection was not checked because it was cached. Considering it secure to not break your app.");
+        // CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
+        NSString *errStr = @"CONNECTION_FINISHED. Details: URL loaded successfully without obtain any certificate, it might be caused by cached connection or not https protocol.";
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:errStr];
         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
     }
 }
 
-- (NSString*) getFingerprint: (SecCertificateRef) cert {
-    NSData* certData = (__bridge NSData*) SecCertificateCopyData(cert);
+- (NSString*) getFingerprint: (NSData*) certData {
     unsigned char sha1Bytes[CC_SHA1_DIGEST_LENGTH];
     CC_SHA1(certData.bytes, (int)certData.length, sha1Bytes);
     NSMutableString *fingerprint = [NSMutableString stringWithCapacity:CC_SHA1_DIGEST_LENGTH * 3];
