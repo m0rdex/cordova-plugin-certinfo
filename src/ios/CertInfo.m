@@ -77,27 +77,6 @@
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dict];
     [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
     self.sentResponse = TRUE;
-
-    // CFIndex count = 1;
-    //
-    // for (CFIndex i = 0; i < count; i++)
-    // {
-    //     SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, i);
-    //     NSString* fingerprint = [self getFingerprint:certRef];
-    //
-    //     if ([self isFingerprintTrusted: fingerprint]) {
-    //         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
-    //         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
-    //         self.sentResponse = TRUE;
-    //         break;
-    //     }
-    // }
-    //
-    // if (! self.sentResponse) {
-    //     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
-    //     [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
-    // }
-
 }
 
 // Delegate method, called from connectionWithRequest
@@ -115,8 +94,6 @@
     connection = nil;
 
     if (![self sentResponse]) {
-        // NSLog(@"Connection was not checked because it was cached. Considering it secure to not break your app.");
-        // CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"CONNECTION_SECURE"];
         NSString *errStr = @"CONNECTION_FINISHED. Details: URL loaded successfully without obtain any certificate, it might be caused by cached connection or not https protocol.";
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:errStr];
         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
@@ -131,15 +108,6 @@
         [fingerprint appendFormat:@"%02x ", sha1Bytes[i]];
     }
     return [fingerprint stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-}
-
-- (BOOL) isFingerprintTrusted: (NSString*)fingerprint {
-  for (NSString *fp in self._allowedFingerprints) {
-    if ([fingerprint caseInsensitiveCompare: fp] == NSOrderedSame) {
-      return YES;
-    }
-  }
-  return NO;
 }
 
 @end
