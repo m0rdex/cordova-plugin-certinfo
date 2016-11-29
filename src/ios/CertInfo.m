@@ -122,7 +122,7 @@
 
 @implementation CertInfo
 
-- (void)check:(CDVInvokedUrlCommand*)command {
+- (void)fetch:(CDVInvokedUrlCommand*)command {
     NSString *serverURL = [command.arguments objectAtIndex:0];
     BOOL allowUntrusted = [command.arguments count] > 1 && [[command.arguments objectAtIndex:1] boolValue];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:serverURL]];

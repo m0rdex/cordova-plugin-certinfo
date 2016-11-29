@@ -3,6 +3,6 @@
 
 @interface CertInfo : CDVPlugin
 
-- (void)check:(CDVInvokedUrlCommand*)command;
+- (void)fetch:(CDVInvokedUrlCommand*)command;
 
 @end
