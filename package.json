@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-certinfo",
-  "version": "5.0.0",
-  "description": "This plugin allows allows you to fetch the SSL/TLS Certificate of the server you're connecting to. This can be useful for prevention of Man In The Middle attacks.",
+  "version": "0.1.0",
+  "description": "This plugin allows allows you to fetch the SSL Certificate of the server you're connecting to. This can be useful for prevention of Man In The Middle attacks.",
   "cordova": {
     "id": "cordova-plugin-certinfo",
     "platforms": [

@@ -2,12 +2,12 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 		xmlns:android="http://schemas.android.com/apk/res/android"
 		id="cordova-plugin-certinfo"
-		version="5.0.0">
+		version="0.1.0">
 
-	<name>Cordova SSL/TLS Certificate Info</name>
+	<name>Cordova SSL Certificate Info</name>
 
 	<description>
-		This plugin allows allows you to fetch the SSL/TLS Certificate of the server you're connecting to.
+		This plugin allows allows you to fetch the SSL Certificate of the server you're connecting to.
 		This can be useful for prevention of Man In The Middle attacks.
 	</description>
 
