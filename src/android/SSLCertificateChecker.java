@@ -1,9 +1,12 @@
 package nl.xservices.plugins;
 
+import android.util.Base64;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.security.cert.CertificateException;
@@ -11,8 +14,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 public class SSLCertificateChecker extends CordovaPlugin {
 
@@ -27,10 +30,16 @@ public class SSLCertificateChecker extends CordovaPlugin {
           try {
             final String serverURL = args.getString(0);
             //final JSONArray allowedFingerprints = args.getJSONArray(2);
-            final Certificate cert = getCertificate(serverURL);
+            final X509Certificate cert = getCertificate(serverURL);
             final byte[] data = cert.getEncoded();
             final String fingerprint = getFingerprint(data);
-            callbackContext.success(new JSONObject(ImmutableMap.of("certificate", data, "fingerprint", fingerprint, "summary", cert.toString())));
+            final JSONObject json = new JSONObject();
+            json.put("certificate", Base64.encodeToString(data, Base64.NO_WRAP));
+            json.put("fingerprint", fingerprint);
+            json.put("subject", cert.getSubjectX500Principal());
+            json.put("issuer", cert.getIssuerX500Principal());
+            json.put("details", cert.toString());
+            callbackContext.success(json);
             //for (int j=0; j<allowedFingerprints.length(); j++) {
             //  if (allowedFingerprints.get(j).toString().equalsIgnoreCase(serverCertFingerprint)) {
             //    callbackContext.success("CONNECTION_SECURE");
@@ -50,12 +59,11 @@ public class SSLCertificateChecker extends CordovaPlugin {
     }
   }
 
-  private static String getCertificate(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
+  private static X509Certificate getCertificate(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
     final HttpsURLConnection con = (HttpsURLConnection) new URL(httpsURL).openConnection();
     con.setConnectTimeout(5000);
     con.connect();
-    final Certificate cert = con.getServerCertificates()[0];
-    return cert;
+    return (X509Certificate)con.getServerCertificates()[0];
   }
 
   private static String getFingerprint(final byte[] data) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {

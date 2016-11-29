@@ -42,13 +42,13 @@
     }
 
     NSString* data = [certData base64EncodedStringWithOptions:0];
-    NSString* summary = [[NSString alloc] initWithString:(__bridge NSString*) SecCertificateCopySubjectSummary(certRef)];
+    NSString* subject = [[NSString alloc] initWithString:(__bridge NSString*) SecCertificateCopySubjectSummary(certRef)];
     NSString* fingerprint = [self getFingerprint:certData];
 
     NSDictionary* dict = @{
         @"certificate" : data,
         @"fingerprint" : fingerprint,
-            @"summary" : summary
+            @"subject" : subject
     };
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dict];
