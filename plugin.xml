@@ -19,7 +19,7 @@
 		<engine name="cordova" version=">=3.0.0"/>
 	</engines>
 
-	<js-module name="CertInfo" src="www/CertInfo.js">
+	<js-module src="www/cert-info.js" name="CertInfo">
 		<clobbers target="window.plugins.CertInfo"/>
 	</js-module>
 
