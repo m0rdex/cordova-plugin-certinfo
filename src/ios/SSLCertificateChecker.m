@@ -7,49 +7,53 @@
 
 @property (strong, nonatomic) CDVPlugin *_plugin;
 @property (strong, nonatomic) NSString *_callbackId;
-@property (strong, nonatomic) NSArray *_allowedFingerprints;
+@property (nonatomic, assign) BOOL _allowUntrusted;
 @property (nonatomic, assign) BOOL sentResponse;
 
-- (id)initWithPlugin:(CDVPlugin*)plugin callbackId:(NSString*)callbackId checkInCertChain:(BOOL)checkInCertChain allowedFingerprints:(NSArray*)allowedFingerprints;
+- (id)initWithPlugin:(CDVPlugin*)plugin callbackId:(NSString*)callbackId allowUntrusted:(BOOL)allowUntrusted;
 
 @end
 
 @implementation CustomURLConnectionDelegate
 
-- (id)initWithPlugin:(CDVPlugin*)plugin callbackId:(NSString*)callbackId checkInCertChain:(BOOL)checkInCertChain allowedFingerprints:(NSArray*)allowedFingerprints
+- (id)initWithPlugin:(CDVPlugin*)plugin callbackId:(NSString*)callbackId allowUntrusted:(BOOL)allowUntrusted;
 {
     self.sentResponse = FALSE;
     self._plugin = plugin;
     self._callbackId = callbackId;
-    self._allowedFingerprints = allowedFingerprints;
+    self._allowUntrusted = allowUntrusted;
     return self;
 }
 
 // Delegate method, called from connectionWithRequest
 - (void) connection: (NSURLConnection*)connection willSendRequestForAuthenticationChallenge: (NSURLAuthenticationChallenge*)challenge {
     SecTrustRef trustRef = [[challenge protectionSpace] serverTrust];
-    SecTrustEvaluate(trustRef, NULL);
+    SecTrustResultType trustResult;
+    SecTrustEvaluate(trustRef, &trustResult);
 
     [connection cancel];
 
+    BOOL trusted = kSecTrustResultProceed == trustResult || kSecTrustResultUnspecified == trustResult;
     SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, 0);
-    NSData* certData = (__bridge NSData*) SecCertificateCopyData(certRef);
+    NSData* certData = (NSData*) CFBridgingRelease(SecCertificateCopyData(certRef));
 
-    if (certData == NULL) {
-         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
-         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
-         return;
+    if (certData == NULL || !trusted && !self._allowUntrusted) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
+        [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+        return;
     }
 
     NSString* data = [certData base64EncodedStringWithOptions:0];
-    NSString* subject = [[NSString alloc] initWithString:(__bridge NSString*) SecCertificateCopySubjectSummary(certRef)];
+    NSString* subject = [[NSString alloc] initWithString:(NSString*)
+                         CFBridgingRelease(SecCertificateCopySubjectSummary(certRef))];
     NSString* fingerprint = [self getFingerprint:certData];
 
     NSDictionary* dict = @{
-        @"certificate" : data,
-        @"fingerprint" : fingerprint,
-            @"subject" : subject
-    };
+                           @"trusted" : @(trusted),
+                           @"certificate" : data,
+                           @"fingerprint" : fingerprint,
+                           @"subject" : subject
+                           };
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dict];
     [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
@@ -133,16 +137,16 @@
 
 - (void)check:(CDVInvokedUrlCommand*)command {
     NSString *serverURL = [command.arguments objectAtIndex:0];
+    BOOL allowUntrusted = [command.arguments count] > 1 && [[command.arguments objectAtIndex:1] boolValue];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:serverURL]];
-    
+
     CustomURLConnectionDelegate *delegate = [[CustomURLConnectionDelegate alloc] initWithPlugin:self
                                                                                      callbackId:command.callbackId
-                                                                               checkInCertChain:[[command.arguments objectAtIndex:1] boolValue]
-                                                                            allowedFingerprints:[command.arguments objectAtIndex:2]];
-    
+                                                                                 allowUntrusted:allowUntrusted];
+
     if (![NSURLConnection connectionWithRequest:request delegate:delegate]) {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_FAILED"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 
