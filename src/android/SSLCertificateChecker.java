@@ -35,6 +35,7 @@ public class SSLCertificateChecker extends CordovaPlugin {
 
   private static class CertificateResult {
     private Exception exception = null;
+    private boolean domainMismatched = false;
 
     public boolean isTrusted() {
       return exception == null;
@@ -46,6 +47,14 @@ public class SSLCertificateChecker extends CordovaPlugin {
 
     public void setException(Exception ex) {
       exception = ex;
+    }
+
+    public boolean isDomainMismatched() {
+      return domainMismatched;
+    }
+
+    public void setDomainMismatched(boolean domainMismatched) {
+      this.domainMismatched = domainMismatched;
     }
   }
 
@@ -115,8 +124,9 @@ public class SSLCertificateChecker extends CordovaPlugin {
             final byte[] data = cert.getEncoded();
             final String fingerprint = getFingerprint(data);
             final JSONObject json = new JSONObject();
-            json.put("trusted", result != null && result.isTrusted());
+            json.put("trusted", result == null || result.isTrusted());
             if (result != null && !result.isTrusted()) {
+              json.put("mismatched", result.isDomainMismatched());
               json.put("error", result.getException().getMessage());
             }
             json.put("certificate", Base64.encodeToString(data, Base64.NO_WRAP));
@@ -155,6 +165,7 @@ public class SSLCertificateChecker extends CordovaPlugin {
       public boolean verify(String hostname, SSLSession session) {
         if (!HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)) {
           result.setException(new CertificateException("Hostname not matched"));
+          result.setDomainMismatched(true);
         }
         return true;
       }

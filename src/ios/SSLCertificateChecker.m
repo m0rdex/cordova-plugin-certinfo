@@ -28,17 +28,25 @@
 // Delegate method, called from connectionWithRequest
 - (void) connection: (NSURLConnection*)connection willSendRequestForAuthenticationChallenge: (NSURLAuthenticationChallenge*)challenge {
     SecTrustRef trustRef = [[challenge protectionSpace] serverTrust];
-    SecTrustResultType trustResult;
-    SecTrustEvaluate(trustRef, &trustResult);
+    SecTrustResultType trustResultType;
+    SecTrustEvaluate(trustRef, &trustResultType);
+    NSString* errMsg = @"CONNECTION_NOT_SECURE";
 
     [connection cancel];
 
-    BOOL trusted = kSecTrustResultProceed == trustResult || kSecTrustResultUnspecified == trustResult;
+    BOOL trusted = kSecTrustResultProceed == trustResultType || kSecTrustResultUnspecified == trustResultType;
+    if (!trusted) {
+        NSArray* props = CFBridgingRelease(SecTrustCopyProperties(trustRef));
+        if (props != NULL) {
+            errMsg = [[props objectAtIndex:0] valueForKey:@"value"];
+        }
+    }
+
     SecCertificateRef certRef = SecTrustGetCertificateAtIndex(trustRef, 0);
     NSData* certData = (NSData*) CFBridgingRelease(SecCertificateCopyData(certRef));
 
-    if (certData == NULL || !trusted && !self._allowUntrusted) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:@"CONNECTION_NOT_SECURE"];
+    if (certData == NULL || (!trusted && !self._allowUntrusted)) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_JSON_EXCEPTION messageAsString:errMsg];
         [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
         return;
     }
@@ -54,6 +62,17 @@
                            @"fingerprint" : fingerprint,
                            @"subject" : subject
                            };
+
+
+    if (!trusted) {
+        dict = [dict mutableCopy];
+        [dict setValue:errMsg forKey:@"error"];
+
+        NSDictionary* err = CFBridgingRelease(SecTrustCopyResult(trustRef));
+        NSArray* details = [[err objectForKey:@"TrustResultDetails"] valueForKey:@"SSLHostname"];
+        BOOL mismatched = [details  containsObject: @NO];
+        [dict setValue:@(mismatched) forKey:@"mismatched"];
+    }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dict];
     [self._plugin.commandDelegate sendPluginResult:pluginResult callbackId:self._callbackId];
