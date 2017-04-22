@@ -73,7 +73,7 @@ public class CertInfo extends CordovaPlugin {
             break;
           }
         }
-      } catch (KeyStoreException e) {
+      } catch (e) {
         e.printStackTrace();
       }
     }
